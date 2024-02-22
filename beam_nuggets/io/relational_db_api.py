@@ -233,9 +233,10 @@ class SqlAlchemyDB(object):
 
     def __init__(self, source_config):
         self._source = source_config
+        exec(source_config.engine)
         engine = create_engine(
                 "postgresql+pg8000://",
-                creator=source_config.engine
+                creator=getconn
             )
         self._SessionClass = sessionmaker(bind=engine)
         self._session = None  # will be set in self.start_session()
