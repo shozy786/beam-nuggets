@@ -97,22 +97,10 @@ class SourceConfiguration(object):
 
     def __init__(
         self,
-        drivername,
-        host=None,
-        port=None,
-        database=None,
-        username=None,
-        password=None,
+        engine,
         create_if_missing=False,
     ):
-        self.url = URL(
-            drivername=drivername,
-            username=username,
-            password=password,
-            host=host,
-            port=port,
-            database=database
-        )
+        self.engine = engine
         self.create_if_missing = create_if_missing
 
 
@@ -246,16 +234,12 @@ class SqlAlchemyDB(object):
     def __init__(self, source_config):
         self._source = source_config
 
-        self._SessionClass = sessionmaker(bind=create_engine(self._source.url))
+        self._SessionClass = sessionmaker(bind=source_config.engine)
         self._session = None  # will be set in self.start_session()
 
         self._name_to_table = {}  # tables metadata cache
 
     def start_session(self):
-        create_if_missing = self._source.create_if_missing
-        is_database_missing = lambda: not database_exists(self._source.url)
-        if create_if_missing and is_database_missing():
-            create_database(self._source.url)
         self._session = self._SessionClass()
 
     def close_session(self):
